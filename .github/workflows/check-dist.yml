@@ -23,7 +23,7 @@ permissions:
 jobs:
   check-dist:
     name: Check dist/
-    runs-on: vm
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
