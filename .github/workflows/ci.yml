@@ -14,7 +14,7 @@ permissions:
 jobs:
   test-typescript:
     name: TypeScript Tests
-    runs-on: ubuntu-latest
+    runs-on: vm
 
     steps:
       - name: Checkout
@@ -40,25 +40,48 @@ jobs:
         id: npm-lint
         run: npm run lint
 
+      - name: Run spell check
+        id: cspell-check
+        run: npx cspell -c .cspell-lint.json lint .
+
       - name: Test
         id: npm-ci-test
         run: npm run ci-test
 
   test-action:
     name: GitHub Actions Test
-    runs-on: ubuntu-latest
+    runs-on: vm
 
     steps:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Test Local Action
-        id: test-action
+      - name: Import Secrets
+        id: import-secrets
+        uses: spawnlab-dev/github_workflows/.github/actions/vault-secrets@master
+        with:
+          auth_method: 'token'
+          vault_addr: ${{ secrets.VAULT_ADDR }}
+          vault_token: ${{ secrets.VAULT_AUTH_TOKEN }}
+
+      - name: Test Stack Deploy (Swarmpit)
+        id: test-deploy-swarmpit
         uses: ./
         with:
-          milliseconds: 2000
+          host: ${{ env.SWARMPIT_HOST}}
+          api-token: ${{ env.SWARMPIT_API_KEY }}
+          stack: action-ci-test
+          client: 'swarmpit'
+          action: 'deploy'
+          compose: '__tests__/resources/test-compose.yml'
 
-      - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+      - name: Test Stack Delete (Swarmpit)
+        id: test-delete-swarmpit
+        uses: ./
+        with:
+          host: ${{ env.SWARMPIT_HOST}}
+          api-token: ${{ env.SWARMPIT_API_KEY }}
+          stack: action-ci-test
+          client: 'swarmpit'
+          action: 'delete'

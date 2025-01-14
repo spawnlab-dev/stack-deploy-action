@@ -1,0 +1,16 @@
+{
+  "words": ["spawnlab", "swarmpit", "Pradeep", "Mishra"],
+
+  "ignorePaths": [
+    "node_modules/**/*",
+    "dist/**/*",
+    "coverage/**/*",
+    "badges/**/*",
+    "CODEOWNERS",
+    "*.mjs",
+    "*config.js",
+    "*config.ts",
+    "tsconfig*.json",
+    "package.json"
+  ]
+}

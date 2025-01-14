@@ -1,27 +1,60 @@
 import * as core from '@actions/core'
-import { wait } from './wait.js'
+
+import { SwarmpitClient } from './clients/swarmpit.js'
+import { ClientError } from './clients/error.js'
+import { Client } from './clients/client.js'
 
 /**
  * The main function for the action.
- *
- * @returns Resolves when the action is complete.
+ * @returns {Promise<void>} Resolves when the action is complete.
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const HOST = core.getInput('host')
+    const STACK = core.getInput('stack')
+    const API_TOKEN = core.getInput('api-token')
+    const COMPOSE_FILE = core.getInput('compose')
+    const ACTION = core.getInput('action')
+    const CLIENT = core.getInput('client')
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const client: Client = getClientInstance(CLIENT, HOST, API_TOKEN)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    switch (ACTION) {
+      case 'deploy':
+        if (COMPOSE_FILE.length === 0) {
+          core.setFailed('Required docker compose file for deploy')
+        }
+        await client.deploy(STACK, COMPOSE_FILE)
+        core.info('Stack deploy action successful')
+        break
+      case 'delete':
+        await client.delete(STACK)
+        core.info('Stack delete action successful')
+        break
+      default:
+        throw new Error(`Invalid or un-supported action ${ACTION}`)
+    }
   } catch (error) {
     // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    let errorMessage = 'Unknown error'
+    if (error instanceof Error)
+      errorMessage = `Stack deploy action failed with client error ${error.message}`
+    if (error instanceof ClientError)
+      errorMessage = `Stack deploy action failed with client error ${error.message} client: ${error.clientType}`
+
+    core.setFailed(errorMessage)
+  }
+}
+
+function getClientInstance(
+  client: string,
+  host: string,
+  api_token: string
+): Client {
+  switch (client) {
+    case 'swarmpit':
+      return new SwarmpitClient(host, api_token)
+    default:
+      throw new Error(`Client ${client} not implemented.`)
   }
 }
