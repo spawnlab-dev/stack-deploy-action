@@ -57,20 +57,12 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Import Secrets
-        id: import-secrets
-        uses: spawnlab-dev/github_workflows/.github/actions/vault-secrets@master
-        with:
-          auth_method: 'token'
-          vault_addr: ${{ secrets.VAULT_ADDR }}
-          vault_token: ${{ secrets.VAULT_AUTH_TOKEN }}
-
       - name: Test Stack Deploy (Swarmpit)
         id: test-deploy-swarmpit
         uses: ./
         with:
-          host: ${{ env.SWARMPIT_HOST}}
-          api-token: ${{ env.SWARMPIT_API_KEY }}
+          host: ${{ secrets.SWARMPIT_HOST}}
+          api-token: ${{ secrets.SWARMPIT_API_KEY }}
           stack: action-ci-test
           client: 'swarmpit'
           action: 'deploy'
@@ -80,8 +72,8 @@ jobs:
         id: test-delete-swarmpit
         uses: ./
         with:
-          host: ${{ env.SWARMPIT_HOST}}
-          api-token: ${{ env.SWARMPIT_API_KEY }}
+          host: ${{ secrets.SWARMPIT_HOST}}
+          api-token: ${{ secrets.SWARMPIT_API_KEY }}
           stack: action-ci-test
           client: 'swarmpit'
           action: 'delete'
