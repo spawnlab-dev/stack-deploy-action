@@ -1,0 +1,4 @@
+version: '3.3'
+services:
+  action-test:
+    image: 'hello-world'

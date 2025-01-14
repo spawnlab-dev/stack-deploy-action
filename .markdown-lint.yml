@@ -22,3 +22,8 @@ MD030:
 # Code block style
 MD046:
   style: fenced
+
+# allow inline html
+MD033:
+  allowed_elements:
+    - br

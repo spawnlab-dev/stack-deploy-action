@@ -1,23 +1,39 @@
-name: The name of your action here
-description: Provide a description here
-author: Your name or organization here
+name: 'Docker swarm stack deploy'
+description: 'Docker stack deployment using swarmpit/portainer api'
+author: 'Pradeep Mishra'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: heart
-  color: red
+  icon: 'package'
+  color: 'green'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: Your input description here
+  host:
+    description: 'Swarmpit/Portainer API FQDN'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: Your output description here
+  api-token:
+    description: 'Swarmpit/Portainer API Token'
+    required: true
+  stack:
+    description: 'Docker swarm stack name'
+    required: true
+  client:
+    description: 'Choose on of the supported client'
+    type: choice
+    options:
+      - swarmpit
+      - portainer
+    required: true
+  action:
+    description: 'Choose deploy or delete'
+    type: choice
+    options:
+      - deploy
+      - delete
+    required: true
+  compose:
+    description: 'Docker compose file name ( only required for deploy )'
+    required: false
 
 runs:
   using: node20

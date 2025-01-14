@@ -1,6 +1,5 @@
 /**
  * The main function for the action.
- *
- * @returns Resolves when the action is complete.
+ * @returns {Promise<void>} Resolves when the action is complete.
  */
 export declare function run(): Promise<void>;
