@@ -77,3 +77,28 @@ jobs:
           stack: action-ci-test
           client: 'swarmpit'
           action: 'delete'
+
+      - name: Test Stack Deploy (Portainer)
+        id: test-deploy-portainer
+        uses: ./
+        with:
+          host: ${{ secrets.PORTAINER_HOST}}
+          api-token: ${{ secrets.PORTAINER_API_KEY }}
+          swarmId: ${{ secrets.PORTAINER_SWARM_ID }}
+          endPointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+          stack: action-ci-test
+          client: 'portainer'
+          action: 'deploy'
+          compose: '__tests__/resources/test-compose.yml'
+
+      - name: Test Stack Delete (Portainer)
+        id: test-delete-portainer
+        uses: ./
+        with:
+          host: ${{ secrets.PORTAINER_HOST}}
+          api-token: ${{ secrets.PORTAINER_API_KEY }}
+          swarmId: ${{ secrets.PORTAINER_SWARM_ID }}
+          endPointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
+          stack: action-ci-test
+          client: 'portainer'
+          action: 'delete'
