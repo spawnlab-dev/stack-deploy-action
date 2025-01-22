@@ -22,7 +22,7 @@ needing of exposing docker manager node over SSH.
 Since portainer support multi installations i.e. local, remote, and different
 types e.g. k8s, docker compose, swarm etc, So in-order to use the `portainer`
 client you need to pass the `swarmId` & `endPointId`. Please follow the below
-steps/docs mentioned below to find both required value
+steps/docs to find both required value.
 
 - To find the `swarmId` i.e. docker cluster ID, please run the below command in
   docker manager node
