@@ -1,17 +1,17 @@
 {
   "name": "typescript-action",
-  "description": "GitHub Actions TypeScript template",
-  "version": "0.0.0",
-  "author": "",
+  "description": "Docker Stack Deployment Action",
+  "version": "v1.0.1",
+  "author": "Pradeep Mishra",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/actions/typescript-action",
+  "homepage": "https://github.com/spawnlab-dev/stack-deploy-action",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/spawnlab-dev/stack-deploy-action.git"
   },
   "bugs": {
-    "url": "https://github.com/actions/typescript-action/issues"
+    "url": "https://github.com/spawnlab-dev/stack-deploy-action/issues"
   },
   "keywords": [
     "actions"
