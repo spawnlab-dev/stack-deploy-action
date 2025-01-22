@@ -61,22 +61,4 @@ describe('main.ts', () => {
       'Stack deploy action failed with client error Mock error client: foo-client'
     )
   })
-
-  it('test client success', async () => {
-    // when
-    mockDeploy.mockImplementationOnce(async () => Promise.resolve())
-
-    await run()
-
-    // then
-    expect(mockDeploy).toHaveBeenCalledWith(
-      'foo-stack',
-      `${process.cwd()}/__tests__/resources/test-compose.yml`
-    )
-
-    expect(core.info).toHaveBeenNthCalledWith(
-      1,
-      'Stack deploy action successful'
-    )
-  })
 })

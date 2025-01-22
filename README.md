@@ -24,7 +24,7 @@ types e.g. k8s, docker compose, swarm etc, So in-order to use the `portainer`
 client you need to pass the `swarmId` & `endPointId`. Please follow the below
 steps/docs mentioned below to find both required value
 
-- To find the `swarmId` i.e. docker cluster id, please run the below command in
+- To find the `swarmId` i.e. docker cluster ID, please run the below command in
   docker manager node
 
 ```shell
@@ -47,8 +47,8 @@ Use value `mtoqjoa2xxvXXXrw` as "swarmId"
 | client     | **Yes**  | -       | Remote client type `swarmpit` or `portainer`                        |
 | action     | **Yes**  | -       | Stack action `delete` or `deploy`                                   |
 | compose    | Optional | -       | Docker Compose file, only required if `action` set to `deploy`      |
-| endPointId | Optional | -       | Portainer endpoint id, only required if `client` set to `portainer` |
-| swarmId    | Optional | -       | Docker cluster id, only required if `client` set to `portainer`     |
+| endPointId | Optional | -       | Portainer endpoint ID, only required if `client` set to `portainer` |
+| swarmId    | Optional | -       | Docker cluster ID, only required if `client` set to `portainer`     |
 
 ## Usage
 
@@ -105,7 +105,3 @@ Use value `mtoqjoa2xxvXXXrw` as "swarmId"
     client: 'portainer'
     action: 'delete'
   ```
-
-```
-
-```
