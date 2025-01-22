@@ -67,6 +67,10 @@ export class PortainerClient extends Client {
         }
       }
 
+      core.debug(
+        `Deploying stack endpoint: ${endpoint} body: ${JSON.stringify(postBody)}`
+      )
+
       const response = await fetch(endpoint, {
         method: method,
         headers: this.getRequestHeader(),
@@ -75,8 +79,9 @@ export class PortainerClient extends Client {
 
       if (!response.ok) {
         core.setFailed(
-          `Stack deployment failed with client response ${response.status}`
+          `Stack deployment failed with client response ${response.status} ${response.text}`
         )
+        return
       }
       core.info(message)
     } catch (error) {
@@ -157,7 +162,7 @@ export class PortainerClient extends Client {
 
   private async getAllStacks(): Promise<Array<Stack>> {
     const encodeFilter = encodeURIComponent(
-      JSON.stringify({ "SwarmId": `${this.swarmId}` })
+      JSON.stringify({ SwarmId: `${this.swarmId}` })
     )
     const endpoint = `${this.host}/${this.stackBasePath}?filters=${encodeFilter}`
 

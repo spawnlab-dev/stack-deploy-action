@@ -34624,13 +34624,15 @@ class PortainerClient extends Client {
                     swarmID: this.swarmId
                 };
             }
+            coreExports.debug(`Deploying stack endpoint: ${endpoint} body: ${JSON.stringify(postBody)}`);
             const response = await fetch(endpoint, {
                 method: method,
                 headers: this.getRequestHeader(),
                 body: JSON.stringify(postBody)
             });
             if (!response.ok) {
-                coreExports.setFailed(`Stack deployment failed with client response ${response.status}`);
+                coreExports.setFailed(`Stack deployment failed with client response ${response.status} ${response.text}`);
+                return;
             }
             coreExports.info(message);
         }
