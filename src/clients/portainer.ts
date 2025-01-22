@@ -11,10 +11,9 @@ import util from 'util'
 import { Client } from './client.js'
 import { ClientError } from './error.js'
 
-interface Stack {
+export interface Stack {
   Id: number
   Name: string
-  EndpointId: number
 }
 
 export class PortainerClient extends Client {
@@ -67,10 +66,6 @@ export class PortainerClient extends Client {
         }
       }
 
-      core.debug(
-        `Deploying stack endpoint: ${endpoint} body: ${JSON.stringify(postBody)}`
-      )
-
       const response = await fetch(endpoint, {
         method: method,
         headers: this.getRequestHeader(),
@@ -79,7 +74,7 @@ export class PortainerClient extends Client {
 
       if (!response.ok) {
         core.setFailed(
-          `Stack deployment failed with client response ${response.status} ${response.text}`
+          `Stack deployment failed with client response ${response.status}`
         )
         return
       }
@@ -99,7 +94,9 @@ export class PortainerClient extends Client {
     let endpoint = `${this.host}/${this.stackBasePath}`
 
     try {
-      if ((await this.isPresent(stack_name)) && this.stack) {
+      const isPresent = await this.isPresent(stack_name)
+      core.debug(`stack ${stack_name} isPresent: ${isPresent}`)
+      if (isPresent && this.stack) {
         endpoint += `/${this.stack.Id}?endpointId=${this.endPointId}`
         const response = await fetch(endpoint, {
           method: 'delete',
@@ -110,6 +107,7 @@ export class PortainerClient extends Client {
           core.setFailed(
             `Stack deletion failed with client response ${response.status}`
           )
+          return
         }
 
         core.info(`Successfully deleted stack ${stack_name}`)
@@ -130,13 +128,15 @@ export class PortainerClient extends Client {
   }
 
   async isPresent(stack_name: string): Promise<boolean> {
+    let isPresent: boolean = false
+
     try {
       const stacks: Array<Stack> = await this.getAllStacks()
       if (stacks?.length) {
         stacks.forEach((stack: Stack) => {
           if (stack.Name === stack_name) {
             this.stack = stack
-            return true
+            isPresent = true
           }
         })
       }
@@ -150,12 +150,12 @@ export class PortainerClient extends Client {
       throw new Error(errorMessage)
     }
 
-    return false
+    return isPresent
   }
 
   getRequestHeader(): Headers {
     return new Headers({
-      Authorization: `X-API-Key ${this.api_token}`,
+      'X-API-Key': `${this.api_token}`,
       'Content-Type': 'application/json'
     })
   }

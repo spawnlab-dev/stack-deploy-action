@@ -34,11 +34,9 @@ export async function run(): Promise<void> {
           core.setFailed('Required docker compose file for deploy')
         }
         await client.deploy(STACK, COMPOSE_FILE)
-        core.info('Stack deploy action successful')
         break
       case 'delete':
         await client.delete(STACK)
-        core.info('Stack delete action successful')
         break
       default:
         throw new Error(`Invalid or un-supported action ${ACTION}`)

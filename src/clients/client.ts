@@ -2,8 +2,6 @@
  * A simple abstract base client implementation
  */
 
-import { Headers } from 'node-fetch'
-
 export abstract class Client {
   abstract host: string
   abstract api_token: string
@@ -13,6 +11,4 @@ export abstract class Client {
   abstract delete(stack_name: string): Promise<void>
 
   abstract isPresent(stack_name: string): Promise<boolean>
-
-  abstract getRequestHeader(): Headers
 }

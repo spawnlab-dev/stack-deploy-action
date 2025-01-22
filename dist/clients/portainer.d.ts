@@ -4,6 +4,10 @@
  */
 import { Headers } from 'node-fetch';
 import { Client } from './client.js';
+export interface Stack {
+    Id: number;
+    Name: string;
+}
 export declare class PortainerClient extends Client {
     private stackBasePath;
     private stack;

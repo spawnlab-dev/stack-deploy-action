@@ -34512,6 +34512,7 @@ class SwarmpitClient extends Client {
             });
             if (!response.ok) {
                 coreExports.setFailed(`Stack deployment failed with client response ${response.status}`);
+                return;
             }
             coreExports.info(message);
         }
@@ -34535,6 +34536,7 @@ class SwarmpitClient extends Client {
                 });
                 if (!response.ok) {
                     coreExports.setFailed(`Stack deletion failed with client response ${response.status}`);
+                    return;
                 }
                 coreExports.info(`Successfully deleted stack ${stack_name}`);
             }
@@ -34624,14 +34626,13 @@ class PortainerClient extends Client {
                     swarmID: this.swarmId
                 };
             }
-            coreExports.debug(`Deploying stack endpoint: ${endpoint} body: ${JSON.stringify(postBody)}`);
             const response = await fetch(endpoint, {
                 method: method,
                 headers: this.getRequestHeader(),
                 body: JSON.stringify(postBody)
             });
             if (!response.ok) {
-                coreExports.setFailed(`Stack deployment failed with client response ${response.status} ${response.text}`);
+                coreExports.setFailed(`Stack deployment failed with client response ${response.status}`);
                 return;
             }
             coreExports.info(message);
@@ -34648,7 +34649,9 @@ class PortainerClient extends Client {
     async delete(stack_name) {
         let endpoint = `${this.host}/${this.stackBasePath}`;
         try {
-            if ((await this.isPresent(stack_name)) && this.stack) {
+            const isPresent = await this.isPresent(stack_name);
+            coreExports.debug(`stack ${stack_name} isPresent: ${isPresent}`);
+            if (isPresent && this.stack) {
                 endpoint += `/${this.stack.Id}?endpointId=${this.endPointId}`;
                 const response = await fetch(endpoint, {
                     method: 'delete',
@@ -34656,6 +34659,7 @@ class PortainerClient extends Client {
                 });
                 if (!response.ok) {
                     coreExports.setFailed(`Stack deletion failed with client response ${response.status}`);
+                    return;
                 }
                 coreExports.info(`Successfully deleted stack ${stack_name}`);
             }
@@ -34673,13 +34677,14 @@ class PortainerClient extends Client {
         }
     }
     async isPresent(stack_name) {
+        let isPresent = false;
         try {
             const stacks = await this.getAllStacks();
             if (stacks?.length) {
                 stacks.forEach((stack) => {
                     if (stack.Name === stack_name) {
                         this.stack = stack;
-                        return true;
+                        isPresent = true;
                     }
                 });
             }
@@ -34692,11 +34697,11 @@ class PortainerClient extends Client {
                 errorMessage = `Failed to check if stack exists ${error.message} ${error.type}`;
             throw new Error(errorMessage);
         }
-        return false;
+        return isPresent;
     }
     getRequestHeader() {
         return new Headers({
-            Authorization: `X-API-Key ${this.api_token}`,
+            'X-API-Key': `${this.api_token}`,
             'Content-Type': 'application/json'
         });
     }
@@ -34746,11 +34751,9 @@ async function run() {
                     coreExports.setFailed('Required docker compose file for deploy');
                 }
                 await client.deploy(STACK, COMPOSE_FILE);
-                coreExports.info('Stack deploy action successful');
                 break;
             case 'delete':
                 await client.delete(STACK);
-                coreExports.info('Stack delete action successful');
                 break;
             default:
                 throw new Error(`Invalid or un-supported action ${ACTION}`);

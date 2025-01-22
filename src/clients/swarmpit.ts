@@ -52,6 +52,7 @@ export class SwarmpitClient extends Client {
         core.setFailed(
           `Stack deployment failed with client response ${response.status}`
         )
+        return
       }
       core.info(message)
     } catch (error) {
@@ -80,8 +81,8 @@ export class SwarmpitClient extends Client {
           core.setFailed(
             `Stack deletion failed with client response ${response.status}`
           )
+          return
         }
-
         core.info(`Successfully deleted stack ${stack_name}`)
       } else {
         core.setFailed(
