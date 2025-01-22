@@ -86,7 +86,7 @@ jobs:
           api-token: ${{ secrets.PORTAINER_API_KEY }}
           swarmId: ${{ secrets.PORTAINER_SWARM_ID }}
           endPointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
-          stack: action-ci-test
+          stack: action-ci-test-portainer
           client: 'portainer'
           action: 'deploy'
           compose: '__tests__/resources/test-compose.yml'
@@ -99,6 +99,6 @@ jobs:
           api-token: ${{ secrets.PORTAINER_API_KEY }}
           swarmId: ${{ secrets.PORTAINER_SWARM_ID }}
           endPointId: ${{ secrets.PORTAINER_ENDPOINT_ID }}
-          stack: action-ci-test
+          stack: action-ci-test-portainer
           client: 'portainer'
           action: 'delete'
