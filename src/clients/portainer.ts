@@ -157,7 +157,7 @@ export class PortainerClient extends Client {
 
   private async getAllStacks(): Promise<Array<Stack>> {
     const encodeFilter = encodeURIComponent(
-      JSON.stringify({ SwarmId: `${this.swarmId}` })
+      JSON.stringify({ "SwarmId": `${this.swarmId}` })
     )
     const endpoint = `${this.host}/${this.stackBasePath}?filters=${encodeFilter}`
 
