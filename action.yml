@@ -34,6 +34,14 @@ inputs:
   compose:
     description: 'Docker compose file name ( only required for deploy )'
     required: false
+  endPointId:
+    description:
+      'Portainer endpoint id ( only required if client is portainer )'
+    required: false
+  swarmId:
+    description:
+      'Docker swarm cluster id ( only required if client is portainer )'
+    required: false
 
 runs:
   using: node20

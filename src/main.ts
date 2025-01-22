@@ -3,6 +3,7 @@ import * as core from '@actions/core'
 import { SwarmpitClient } from './clients/swarmpit.js'
 import { ClientError } from './clients/error.js'
 import { Client } from './clients/client.js'
+import { PortainerClient } from './clients/portainer.js'
 
 /**
  * The main function for the action.
@@ -16,8 +17,16 @@ export async function run(): Promise<void> {
     const COMPOSE_FILE = core.getInput('compose')
     const ACTION = core.getInput('action')
     const CLIENT = core.getInput('client')
+    const ENDPOINT_ID = core.getInput('endPointId')
+    const SWARM_ID = core.getInput('swarmId')
 
-    const client: Client = getClientInstance(CLIENT, HOST, API_TOKEN)
+    const client: Client = getClientInstance(
+      CLIENT,
+      HOST,
+      API_TOKEN,
+      ENDPOINT_ID,
+      SWARM_ID
+    )
 
     switch (ACTION) {
       case 'deploy':
@@ -25,11 +34,9 @@ export async function run(): Promise<void> {
           core.setFailed('Required docker compose file for deploy')
         }
         await client.deploy(STACK, COMPOSE_FILE)
-        core.info('Stack deploy action successful')
         break
       case 'delete':
         await client.delete(STACK)
-        core.info('Stack delete action successful')
         break
       default:
         throw new Error(`Invalid or un-supported action ${ACTION}`)
@@ -49,11 +56,15 @@ export async function run(): Promise<void> {
 function getClientInstance(
   client: string,
   host: string,
-  api_token: string
+  api_token: string,
+  endpoint_id: string,
+  swarm_id: string
 ): Client {
   switch (client) {
     case 'swarmpit':
       return new SwarmpitClient(host, api_token)
+    case 'portainer':
+      return new PortainerClient(host, api_token, endpoint_id, swarm_id)
     default:
       throw new Error(`Client ${client} not implemented.`)
   }

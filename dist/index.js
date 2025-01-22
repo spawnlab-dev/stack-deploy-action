@@ -34461,12 +34461,6 @@ function fixResponseChunkedTransferBadEnding(request, errorCallback) {
  * A simple abstract base client implementation
  */
 class Client {
-    getDefaultHeader() {
-        return new Headers({
-            Authorization: `Bearer ${this.api_token}`,
-            'Content-Type': 'application/json'
-        });
-    }
 }
 
 /**
@@ -34513,11 +34507,12 @@ class SwarmpitClient extends Client {
             }
             const response = await fetch(endpoint, {
                 method: 'post',
-                headers: this.getDefaultHeader(),
+                headers: this.getRequestHeader(),
                 body: JSON.stringify(postBody)
             });
             if (!response.ok) {
                 coreExports.setFailed(`Stack deployment failed with client response ${response.status}`);
+                return;
             }
             coreExports.info(message);
         }
@@ -34537,10 +34532,11 @@ class SwarmpitClient extends Client {
                 endpoint += `/${stack_name}`;
                 const response = await fetch(endpoint, {
                     method: 'delete',
-                    headers: this.getDefaultHeader()
+                    headers: this.getRequestHeader()
                 });
                 if (!response.ok) {
                     coreExports.setFailed(`Stack deletion failed with client response ${response.status}`);
+                    return;
                 }
                 coreExports.info(`Successfully deleted stack ${stack_name}`);
             }
@@ -34562,7 +34558,7 @@ class SwarmpitClient extends Client {
         try {
             const response = await fetch(endpoint, {
                 method: 'get',
-                headers: this.getDefaultHeader()
+                headers: this.getRequestHeader()
             });
             if (response.ok) {
                 return true;
@@ -34578,6 +34574,160 @@ class SwarmpitClient extends Client {
         }
         return false;
     }
+    getRequestHeader() {
+        return new Headers({
+            Authorization: `Bearer ${this.api_token}`,
+            'Content-Type': 'application/json'
+        });
+    }
+}
+
+/**
+ * Portainer http client wrapper for docker swarm
+ * stack management.
+ */
+class PortainerClient extends Client {
+    stackBasePath = 'api/stacks';
+    stack;
+    host;
+    api_token;
+    endPointId;
+    swarmId;
+    constructor(host, api_token, endPointId, swarmId) {
+        super();
+        this.host = host;
+        this.api_token = api_token;
+        this.endPointId = endPointId;
+        this.swarmId = swarmId;
+    }
+    async deploy(stack_name, compose_file) {
+        const readFile = require$$0$2.promisify(require$$1.readFile);
+        const composeFileContents = await readFile(compose_file, 'utf-8');
+        let postBody = undefined;
+        let endpoint = `${this.host}/${this.stackBasePath}`;
+        let message = `Successfully deployed stack ${stack_name}`;
+        let method = 'post';
+        try {
+            if ((await this.isPresent(stack_name)) && this.stack) {
+                endpoint += `/${this.stack.Id}?endpointId=${this.endPointId}`;
+                postBody = {
+                    stackFileContent: composeFileContents,
+                    prune: true,
+                    pullImage: true
+                };
+                method = 'put';
+                message = `Successfully redeployed stack ${stack_name}`;
+            }
+            else {
+                endpoint += `/create/swarm/string?endpointId=${this.endPointId}`;
+                postBody = {
+                    name: stack_name,
+                    stackFileContent: composeFileContents,
+                    swarmID: this.swarmId
+                };
+            }
+            const response = await fetch(endpoint, {
+                method: method,
+                headers: this.getRequestHeader(),
+                body: JSON.stringify(postBody)
+            });
+            if (!response.ok) {
+                coreExports.setFailed(`Stack deployment failed with client response ${response.status}`);
+                return;
+            }
+            coreExports.info(message);
+        }
+        catch (error) {
+            let errorMessage = 'Unknown error';
+            if (error instanceof Error)
+                errorMessage = `Failed to deploy stack ${stack_name} error: ${error.message}`;
+            if (error instanceof FetchError)
+                errorMessage = `Failed to deploy stack ${stack_name} error: ${error.message} ${error.code}`;
+            throw new ClientError(errorMessage, PortainerClient.name);
+        }
+    }
+    async delete(stack_name) {
+        let endpoint = `${this.host}/${this.stackBasePath}`;
+        try {
+            const isPresent = await this.isPresent(stack_name);
+            coreExports.debug(`stack ${stack_name} isPresent: ${isPresent}`);
+            if (isPresent && this.stack) {
+                endpoint += `/${this.stack.Id}?endpointId=${this.endPointId}`;
+                const response = await fetch(endpoint, {
+                    method: 'delete',
+                    headers: this.getRequestHeader()
+                });
+                if (!response.ok) {
+                    coreExports.setFailed(`Stack deletion failed with client response ${response.status}`);
+                    return;
+                }
+                coreExports.info(`Successfully deleted stack ${stack_name}`);
+            }
+            else {
+                coreExports.setFailed(`Stack deletion failed because ${stack_name} doesn't exits`);
+            }
+        }
+        catch (error) {
+            let errorMessage = 'Unknown error';
+            if (error instanceof Error)
+                errorMessage = `Failed to deploy stack ${stack_name} error: ${error.message}`;
+            if (error instanceof FetchError)
+                errorMessage = `Failed to deploy stack ${stack_name} error: ${error.message} ${error.code}`;
+            throw new ClientError(errorMessage, PortainerClient.name);
+        }
+    }
+    async isPresent(stack_name) {
+        let isPresent = false;
+        try {
+            const stacks = await this.getAllStacks();
+            if (stacks?.length) {
+                stacks.forEach((stack) => {
+                    if (stack.Name === stack_name) {
+                        this.stack = stack;
+                        isPresent = true;
+                    }
+                });
+            }
+        }
+        catch (error) {
+            let errorMessage = 'Unknown error';
+            if (error instanceof Error)
+                errorMessage = `Failed to check if stack exists ${error.message}`;
+            if (error instanceof FetchError)
+                errorMessage = `Failed to check if stack exists ${error.message} ${error.type}`;
+            throw new Error(errorMessage);
+        }
+        return isPresent;
+    }
+    getRequestHeader() {
+        return new Headers({
+            'X-API-Key': `${this.api_token}`,
+            'Content-Type': 'application/json'
+        });
+    }
+    async getAllStacks() {
+        const encodeFilter = encodeURIComponent(JSON.stringify({ SwarmId: `${this.swarmId}` }));
+        const endpoint = `${this.host}/${this.stackBasePath}?filters=${encodeFilter}`;
+        let stacks = [];
+        try {
+            const response = await fetch(endpoint, {
+                method: 'get',
+                headers: this.getRequestHeader()
+            });
+            if (response.ok) {
+                stacks = (await response.json());
+            }
+        }
+        catch (error) {
+            let errorMessage = 'Unknown error';
+            if (error instanceof Error)
+                errorMessage = `Failed to fetch list of all stacks ${error.message}`;
+            if (error instanceof FetchError)
+                errorMessage = `Failed to fetch list of all stacks ${error.message} ${error.type}`;
+            throw new Error(errorMessage);
+        }
+        return stacks;
+    }
 }
 
 /**
@@ -34592,18 +34742,18 @@ async function run() {
         const COMPOSE_FILE = coreExports.getInput('compose');
         const ACTION = coreExports.getInput('action');
         const CLIENT = coreExports.getInput('client');
-        const client = getClientInstance(CLIENT, HOST, API_TOKEN);
+        const ENDPOINT_ID = coreExports.getInput('endPointId');
+        const SWARM_ID = coreExports.getInput('swarmId');
+        const client = getClientInstance(CLIENT, HOST, API_TOKEN, ENDPOINT_ID, SWARM_ID);
         switch (ACTION) {
             case 'deploy':
                 if (COMPOSE_FILE.length === 0) {
                     coreExports.setFailed('Required docker compose file for deploy');
                 }
                 await client.deploy(STACK, COMPOSE_FILE);
-                coreExports.info('Stack deploy action successful');
                 break;
             case 'delete':
                 await client.delete(STACK);
-                coreExports.info('Stack delete action successful');
                 break;
             default:
                 throw new Error(`Invalid or un-supported action ${ACTION}`);
@@ -34619,10 +34769,12 @@ async function run() {
         coreExports.setFailed(errorMessage);
     }
 }
-function getClientInstance(client, host, api_token) {
+function getClientInstance(client, host, api_token, endpoint_id, swarm_id) {
     switch (client) {
         case 'swarmpit':
             return new SwarmpitClient(host, api_token);
+        case 'portainer':
+            return new PortainerClient(host, api_token, endpoint_id, swarm_id);
         default:
             throw new Error(`Client ${client} not implemented.`);
     }

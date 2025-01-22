@@ -2,6 +2,7 @@
  * Swarmpit http client wrapper for docker swarm
  * stack management.
  */
+import { Headers } from 'node-fetch';
 import { Client } from './client.js';
 export declare class SwarmpitClient extends Client {
     private stackBasePath;
@@ -11,4 +12,5 @@ export declare class SwarmpitClient extends Client {
     deploy(stack_name: string, compose_file: string): Promise<void>;
     delete(stack_name: string): Promise<void>;
     isPresent(stack_name: string): Promise<boolean>;
+    getRequestHeader(): Headers;
 }
