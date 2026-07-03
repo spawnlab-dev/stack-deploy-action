@@ -57,4 +57,7 @@ jobs:
           VALIDATE_JAVASCRIPT_BIOME: false
           VALIDATE_TYPESCRIPT_BIOME: false
           VALIDATE_JSON_BIOME: false
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_BIOME_LINT: false
+          VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
           GITHUB_ACTIONS_CONFIG_FILE: .actionlint.yml
