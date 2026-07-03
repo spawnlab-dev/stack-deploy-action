@@ -18,18 +18,10 @@ inputs:
     description: 'Docker swarm stack name'
     required: true
   client:
-    description: 'Choose on of the supported client'
-    type: choice
-    options:
-      - swarmpit
-      - portainer
+    description: 'Supported client: swarmpit or portainer'
     required: true
   action:
-    description: 'Choose deploy or delete'
-    type: choice
-    options:
-      - deploy
-      - delete
+    description: 'Action to perform: deploy or delete'
     required: true
   compose:
     description: 'Docker compose file name ( only required for deploy )'
@@ -44,5 +36,5 @@ inputs:
     required: false
 
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
