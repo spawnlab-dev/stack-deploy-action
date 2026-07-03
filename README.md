@@ -6,36 +6,36 @@
 [![CodeQL](https://github.com/spawnlab-dev/stack-deploy-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/spawnlab-dev/stack-deploy-action/actions/workflows/codeql-analysis.yml)
 [![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
-Manage docker swarm stacks using various client API e.g
+Manage Docker swarm stacks using various client API e.g
 [SwarmpIt](https://swarmpit.io/), [Portainer](https://www.portainer.io/) without
-needing of exposing docker manager node over SSH.
+needing of exposing Docker manager node over SSH.
 
 ## Supported Client's
 
-| Client                                | Status | Supported Actions           | Notes                                                 |
-| ------------------------------------- | ------ | --------------------------- | ----------------------------------------------------- |
+| Client                                | Status | Supported Actions         | Notes                                                 |
+| ------------------------------------- | ------ | ------------------------- | ----------------------------------------------------- |
 | [SwarmpIt](https://swarmpit.io/)      | ✅     | [✔] deploy<br> [✔] delete |                                                       |
 | [Portainer](https://www.portainer.io) | ✅     | [✔] deploy<br> [✔] delete | refer the [setup guide](#how-to-use-portainer-client) |
 
 ### How to use `Portainer` client
 
 Since portainer support multi installations i.e. local, remote, and different
-types e.g. k8s, docker compose, swarm etc, So in-order to use the `portainer`
+types e.g. k8s, Docker compose, swarm etc, So in-order to use the `portainer`
 client you need to pass the `swarmId` & `endPointId`. Please follow the below
 steps/docs to find both required value.
 
-- To find the `swarmId` i.e. docker cluster ID, please run the below command in
-  docker manager node
+- To find the `swarmId` i.e. Docker cluster ID, please run the below command in
+  Docker manager node
 
 ```shell
-$ docker info | grep "Cluster"
+$ Docker info | grep "Cluster"
 ClusterID: mtoqjoa2xxvXXXrw
 ```
 
 Use value `mtoqjoa2xxvXXXrw` as "swarmId"
 
-- To find the `endPointId` follow this guide:
-  [here](https://tinyurl.com/yc7m7y5v)
+- To find the `endPointId` follow the
+  [Portainer endpoint ID guide](https://tinyurl.com/yc7m7y5v)
 
 ## Inputs
 
